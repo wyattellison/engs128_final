@@ -26,6 +26,7 @@ entity cursor_amp_to_rgb is
         valid_x_i : in std_logic;
         amp_i : in unsigned (AMP_WIDTH - 1 downto 0);
         rgb_out : out STD_LOGIC_VECTOR (23 downto 0);
+        dbg_i : in std_logic;
         
         clk_i : in std_logic
     );
@@ -106,7 +107,7 @@ end process check_black;
 --Check / assign RGB
 rgb_reg : process(clk_i) begin
     if rising_edge(clk_i) then
-        if (is_black = '1') then
+        if (is_black = '1' and dbg_i = '0') then    
             rgb_out <= (others => '0'); --make it black
         else
             rgb_out <= rgb_int;

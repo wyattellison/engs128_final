@@ -25,6 +25,7 @@ entity av_sync is
         fsync_i : in STD_LOGIC;
         amp_i : in unsigned (AMP_WIDTH - 1 downto 0);
         pixel_clk_i : in STD_LOGIC;
+        dbg_i : in std_logic;
         lr_fft_o : out STD_LOGIC;
         fft_bin_o : out STD_LOGIC_VECTOR (AMP_WIDTH - 1 downto 0);
         active_video_o : out STD_LOGIC;
@@ -80,6 +81,7 @@ component cursor_amp_to_rgb is
         is_top_i : in STD_LOGIC;
         valid_x_i : in std_logic;
         amp_i : in unsigned (AMP_WIDTH - 1 downto 0);
+        dbg_i : in std_logic;
         rgb_out : out STD_LOGIC_VECTOR (23 downto 0);
         
         clk_i : in std_logic
@@ -175,6 +177,7 @@ color_get : cursor_amp_to_rgb
         is_top_i => sync_is_top_half,
         valid_x_i => sync_is_valid_x,
         amp_i => amp_i,
+        dbg_i => dbg_i,
         rgb_out => rgb_o,
         
         clk_i => pixel_clk_i
