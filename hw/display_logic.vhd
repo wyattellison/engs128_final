@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
 --  ENGS128 - Display Logic
--- AUthor: Noah Dunleavy
+-- Author: Noah Dunleavy
 ----------------------------------------------------------------------------------
 
 
@@ -26,7 +26,7 @@ entity display_logic is
         DEAD_PIXEL_AMP : integer := 4   --how tall we want 'dead' signals (the left and right bars) to be
     );
     Port (
-        pixel_clk : std_logic;
+        pixel_clk : in std_logic;
         pixel_x_i : in unsigned(NUM_H_BITS - 1 downto 0);
         pixel_y_i : in unsigned(NUM_V_BITS - 1 downto 0);
         left_amp_i : in unsigned(NUM_FFT_BINS_BITS - 1 downto 0);

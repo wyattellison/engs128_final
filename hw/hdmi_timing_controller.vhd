@@ -13,25 +13,25 @@ use ieee.math_real.all;
 entity hdmi_timing_controller is
     Generic (
         --Horizontal pixel widths
-        PIXEL_HBP : integer := 30;
+        PIXEL_HBP : integer := 220;
         PIXEL_HACT : integer := 1280;   --monitor raw width
-        PIXEL_HFP : integer := 30;
-        PIXEL_HSYNC : integer := 100;
+        PIXEL_HFP : integer := 110;
+        PIXEL_HSYNC : integer := 40;
         --Vertical pixel widths
         PIXEL_VBP : integer := 20;
         PIXEL_VACT : integer := 720;   --monitor raw width
-        PIXEL_VFP : integer := 20;
-        PIXEL_VSYNC : integer := 100;
+        PIXEL_VFP : integer := 5;
+        PIXEL_VSYNC : integer := 5;
         --Number of bits
-        NUM_H_BITS : integer := 11; --number of bits to span the active window horizontally
-        NUM_V_BITS : integer := 10    --to span active window y
+        NUM_H_BITS : integer := 11; --number of bits to span w horizontally
+        NUM_V_BITS : integer := 10    --to span  window y
     );
     Port (
        pixel_clk_i : in STD_LOGIC;
        pixel_x_o : out std_logic_vector(NUM_H_BITS - 1 downto 0);  --make them the right size to span positions
        pixel_y_o : out std_logic_vector(NUM_V_BITS - 1 downto 0);
-       x_active : out std_logic;
-       y_active : out std_logic
+       hsync_o : out std_logic;
+       vsync_o : out std_logic
    );
 end hdmi_timing_controller;
 
@@ -83,11 +83,12 @@ end process y_counter;
 is_active_y <= '1' when ((PIXEL_VBP - 1) < cursor_y_int) AND (cursor_y_int < (PIXEL_VBP + PIXEL_VACT)) else '0';
 
 --Output logic
-x_active <= is_active_x;
-pixel_x_o <= std_logic_vector(to_unsigned(cursor_x_int - PIXEL_HBP, pixel_x_o'length)) when is_active_x = '1' else (others => '0');
+--[TODO] make sync when in sync window, and adjust out to eb all pixels
+hsyc_o <= is_active_x;
+pixel_x_o <= cursor_x_int;
 
-y_active <= is_active_y;
-pixel_y_o <= std_logic_vector(to_unsigned(cursor_y_int - PIXEL_VBP, pixel_y_o'length)) when is_active_y = '1' else (others => '0');
+vsync_o <= is_active_y;
+pixel_y_o <= cursor_y_int;
 
 
 end Behavioral;
