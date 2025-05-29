@@ -24,16 +24,20 @@ end color_logic;
 
 architecture Behavioral of color_logic is
 
-signal red_int, green_int, blue_int : unsigned(7 downto 0) := (others => '0');
-signal red_int_std, green_int_std, blue_int_std : std_logic_vector(7 downto 0) := (others => '0');
+signal red_int, green_int, blue_int : integer := 0;
+signal dbg_x_div, dbg_y_div : integer := 0;
+
+signal dbg_red_y, dbg_green_y, dbg_green_x, dbg_blue_x, dbg_blue_y : integer := 0;
 
 begin
 
+dbg_x_div <= to_integer(x_in(X_CURSOR_WIDTH - 1 downto 4));
+dbg_y_div <= to_integer(y_in(Y_CURSOR_WIDTH - 1 downto 3));
 
-red_int   <= resize(to_unsigned(75, 8) + resize(y_in(Y_CURSOR_WIDTH - 1 downto 2), 8), 8);
-green_int <= resize(to_unsigned(175, 8) - resize(y_in(Y_CURSOR_WIDTH - 1 downto 3), 8) + resize(x_in(X_CURSOR_WIDTH - 1 downto 4), 8), 8);
-blue_int  <= resize(to_unsigned(255, 8) - resize(y_in(Y_CURSOR_WIDTH - 1 downto 3), 8) + resize(x_in(X_CURSOR_WIDTH - 1 downto 4), 8), 8);
+red_int   <= 75 + to_integer(y_in(Y_CURSOR_WIDTH - 1 downto 2));
+green_int <= 175 - dbg_y_div + dbg_x_div;
+blue_int  <= 255 - dbg_y_div - dbg_x_div;
 
-rgb_out <= std_logic_vector(red_int & green_int & blue_int);
+rgb_out <= std_logic_vector(to_unsigned(red_int, 8) & to_unsigned(blue_int, 8) & to_unsigned(green_int, 8));
 
 end Behavioral;
