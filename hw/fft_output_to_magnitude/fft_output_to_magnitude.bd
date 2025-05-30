@@ -1,0 +1,182 @@
+{
+  "design": {
+    "design_info": {
+      "boundary_crc": "0x23BFBA9A23BFBA9A",
+      "device": "xc7z010clg400-1",
+      "name": "fft_output_to_magnitude",
+      "rev_ctrl_bd_flag": "RevCtrlBdOff",
+      "synth_flow_mode": "Hierarchical",
+      "tool_version": "2021.2",
+      "validated": "true"
+    },
+    "design_tree": {
+      "xlslice_0": "",
+      "xlslice_1": "",
+      "mult_gen_0": "",
+      "mult_gen_1": "",
+      "c_addsub_0": ""
+    },
+    "ports": {
+      "fft_abs_o": {
+        "type": "data",
+        "direction": "O",
+        "left": "31",
+        "right": "0",
+        "parameters": {
+          "LAYERED_METADATA": {
+            "value": "xilinx.com:interface:datatypes:1.0 {DATA {datatype {name {attribs {resolve_type immediate dependency {} format string minimum {} maximum {}} value data} bitwidth {attribs {resolve_type generated dependency bitwidth format long minimum {} maximum {}} value 32} bitoffset {attribs {resolve_type immediate dependency {} format long minimum {} maximum {}} value 0} integer {signed {attribs {resolve_type generated dependency signed format bool minimum {} maximum {}} value TRUE}}}} DATA_WIDTH 32}",
+            "value_src": "ip_prop"
+          }
+        }
+      },
+      "fft_axis_data_i": {
+        "direction": "I",
+        "left": "31",
+        "right": "0"
+      }
+    },
+    "components": {
+      "xlslice_0": {
+        "vlnv": "xilinx.com:ip:xlslice:1.0",
+        "xci_name": "fft_output_to_magnitude_xlslice_0_0",
+        "xci_path": "ip\\fft_output_to_magnitude_xlslice_0_0\\fft_output_to_magnitude_xlslice_0_0.xci",
+        "inst_hier_path": "xlslice_0",
+        "parameters": {
+          "DIN_FROM": {
+            "value": "15"
+          },
+          "DOUT_WIDTH": {
+            "value": "16"
+          }
+        }
+      },
+      "xlslice_1": {
+        "vlnv": "xilinx.com:ip:xlslice:1.0",
+        "xci_name": "fft_output_to_magnitude_xlslice_1_0",
+        "xci_path": "ip\\fft_output_to_magnitude_xlslice_1_0\\fft_output_to_magnitude_xlslice_1_0.xci",
+        "inst_hier_path": "xlslice_1",
+        "parameters": {
+          "DIN_FROM": {
+            "value": "31"
+          },
+          "DIN_TO": {
+            "value": "16"
+          },
+          "DOUT_WIDTH": {
+            "value": "16"
+          }
+        }
+      },
+      "mult_gen_0": {
+        "vlnv": "xilinx.com:ip:mult_gen:12.0",
+        "xci_name": "fft_output_to_magnitude_mult_gen_0_0",
+        "xci_path": "ip\\fft_output_to_magnitude_mult_gen_0_0\\fft_output_to_magnitude_mult_gen_0_0.xci",
+        "inst_hier_path": "mult_gen_0",
+        "parameters": {
+          "PipeStages": {
+            "value": "0"
+          },
+          "PortAType": {
+            "value": "Signed"
+          },
+          "PortAWidth": {
+            "value": "16"
+          },
+          "PortBType": {
+            "value": "Signed"
+          },
+          "PortBWidth": {
+            "value": "16"
+          }
+        }
+      },
+      "mult_gen_1": {
+        "vlnv": "xilinx.com:ip:mult_gen:12.0",
+        "xci_name": "fft_output_to_magnitude_mult_gen_1_0",
+        "xci_path": "ip\\fft_output_to_magnitude_mult_gen_1_0\\fft_output_to_magnitude_mult_gen_1_0.xci",
+        "inst_hier_path": "mult_gen_1",
+        "parameters": {
+          "PipeStages": {
+            "value": "0"
+          },
+          "PortAWidth": {
+            "value": "16"
+          },
+          "PortBType": {
+            "value": "Signed"
+          },
+          "PortBWidth": {
+            "value": "16"
+          }
+        }
+      },
+      "c_addsub_0": {
+        "vlnv": "xilinx.com:ip:c_addsub:12.0",
+        "xci_name": "fft_output_to_magnitude_c_addsub_0_0",
+        "xci_path": "ip\\fft_output_to_magnitude_c_addsub_0_0\\fft_output_to_magnitude_c_addsub_0_0.xci",
+        "inst_hier_path": "c_addsub_0",
+        "parameters": {
+          "A_Width": {
+            "value": "32"
+          },
+          "B_Value": {
+            "value": "00000000000000000000000000000000"
+          },
+          "B_Width": {
+            "value": "32"
+          },
+          "CE": {
+            "value": "false"
+          },
+          "Latency": {
+            "value": "0"
+          },
+          "Out_Width": {
+            "value": "32"
+          }
+        }
+      }
+    },
+    "nets": {
+      "Din_0_1": {
+        "ports": [
+          "fft_axis_data_i",
+          "xlslice_1/Din",
+          "xlslice_0/Din"
+        ]
+      },
+      "c_addsub_0_S": {
+        "ports": [
+          "c_addsub_0/S",
+          "fft_abs_o"
+        ]
+      },
+      "mult_gen_0_P": {
+        "ports": [
+          "mult_gen_0/P",
+          "c_addsub_0/A"
+        ]
+      },
+      "mult_gen_1_P": {
+        "ports": [
+          "mult_gen_1/P",
+          "c_addsub_0/B"
+        ]
+      },
+      "xlslice_0_Dout": {
+        "ports": [
+          "xlslice_0/Dout",
+          "mult_gen_1/A",
+          "mult_gen_1/B"
+        ]
+      },
+      "xlslice_1_Dout": {
+        "ports": [
+          "xlslice_1/Dout",
+          "mult_gen_0/A",
+          "mult_gen_0/B"
+        ]
+      }
+    }
+  }
+}

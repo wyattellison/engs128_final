@@ -1,0 +1,9 @@
+{
+	"version": "1.0",
+	"modules": {
+		"fft_output_to_magnitude": {
+			"proto_instances": {
+			}
+		}
+	}
+}
