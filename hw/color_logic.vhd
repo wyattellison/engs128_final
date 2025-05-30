@@ -12,12 +12,13 @@ use ieee.math_real.all;
 
 entity color_logic is
     Generic (
-        X_CURSOR_WIDTH : integer := 11; --num of bits for cursor pos
-        Y_CURSOR_WIDTH : integer := 10
+        CURSOR_WIDTH : integer := 32 --num of bits for cursor pos
     );
     Port ( 
-        x_in : in unsigned (X_CURSOR_WIDTH - 1 downto 0);
-        y_in : in unsigned (Y_CURSOR_WIDTH - 1 downto 0);
+        x_in : in unsigned (CURSOR_WIDTH - 1 downto 0);
+        y_in : in unsigned (CURSOR_WIDTH - 1 downto 0);
+        monitor_width : in unsigned (CURSOR_WIDTH - 1 downto 0);
+        monitor_height : in unsigned (CURSOR_WIDTH - 1 downto 0);
         rgb_out : out STD_LOGIC_VECTOR (23 downto 0)
     );
 end color_logic;
@@ -31,10 +32,10 @@ signal dbg_red_y, dbg_green_y, dbg_green_x, dbg_blue_x, dbg_blue_y : integer := 
 
 begin
 
-dbg_x_div <= to_integer(x_in(X_CURSOR_WIDTH - 1 downto 4));
-dbg_y_div <= to_integer(y_in(Y_CURSOR_WIDTH - 1 downto 3));
+dbg_x_div <= to_integer(x_in(CURSOR_WIDTH - 1 downto 3));
+dbg_y_div <= to_integer(y_in(CURSOR_WIDTH - 1 downto 2));
 
-red_int   <= 75 + to_integer(y_in(Y_CURSOR_WIDTH - 1 downto 2));
+red_int   <= 75 + to_integer(y_in(CURSOR_WIDTH - 1 downto 1));
 green_int <= 175 - dbg_y_div + dbg_x_div;
 blue_int  <= 255 - dbg_y_div - dbg_x_div;
 

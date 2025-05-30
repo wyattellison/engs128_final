@@ -27,15 +27,13 @@ signal en_i, rst_i : std_logic := '0';
 -- Component
 component counter is
     Generic(
-        MAX_COUNT : integer := 20;
-        COUNT_BITS : integer := 5
+        COUNT_BITS : integer := 32
     );
     Port ( 
         en_i : in STD_LOGIC;
         reset_i : in STD_LOGIC;
         clk_i : in std_logic;
-        count_o : out unsigned (COUNT_BITS - 1 downto 0);
-        tc_o : out STD_LOGIC
+        count_o : out unsigned (COUNT_BITS - 1 downto 0)
     );
 end component;
 
@@ -49,8 +47,7 @@ dut: counter
         en_i => en_i,
         reset_i => rst_i,
         clk_i => clk,
-        count_o => open,
-        tc_o => open
+        count_o => open
     );
     
 ----------------------------------------------------------------------------------
