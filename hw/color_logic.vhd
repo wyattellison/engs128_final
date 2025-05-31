@@ -35,7 +35,7 @@ begin
 dbg_x_div <= to_integer(x_in(CURSOR_WIDTH - 1 downto 3));
 dbg_y_div <= to_integer(y_in(CURSOR_WIDTH - 1 downto 2));
 
-red_int   <= 75 + to_integer(y_in(CURSOR_WIDTH - 1 downto 1));
+red_int   <= 100 + to_integer(y_in(CURSOR_WIDTH - 1 downto 2));
 green_int <= 175 - dbg_y_div + dbg_x_div;
 blue_int  <= 255 - dbg_y_div - dbg_x_div;
 

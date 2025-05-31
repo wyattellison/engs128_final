@@ -32,8 +32,10 @@ entity av_sync is
         
         dbg_cursor_x_o : out unsigned (CURSOR_WIDTH - 1 downto 0);
         dbg_cursor_y_o : out unsigned (CURSOR_WIDTH - 1 downto 0);
-        dbg_rgb_o : out STD_LOGIC_VECTOR (23 downto 0);
-        dbg_bin_o : out unsigned(AMP_WIDTH - 1 downto 0)
+        dbg_height_o : out unsigned (CURSOR_WIDTH - 1 downto 0);
+        dbg_width_o : out unsigned (CURSOR_WIDTH - 1 downto 0);
+        dbg_bin_o : out unsigned(AMP_WIDTH - 1 downto 0);
+        dbg_valid_x : out std_logic
     );
 end av_sync;
 
@@ -112,11 +114,12 @@ signal tv_bus, sync_tv_bus : std_logic_vector(1 downto 0) := (others => '0'); --
 
 signal is_top_half, sync_is_top_half : std_logic := '1';
 signal sync_top_bus : std_logic_vector(1 downto 0) := "00";
-signal is_valid_x, sync_is_valid_x : std_logic := '1';
+signal is_valid_x, sync_is_valid_x : std_logic := '1'; 
 
 signal switch_reset_x_int, switch_reset_y_int : std_logic := '0';   --signal to determine reset off switch toggle (sometimes hysync and vsync are active low, sometimes high)  
 signal reset_x_int, reset_y_int : std_logic := '0';
 signal next_row_int : std_logic := '0';
+signal prev_reset_x_int : std_logic := '0';
 
 signal rgb_int : std_logic_vector(23 downto 0) := (others => '0');
 
@@ -127,7 +130,7 @@ switch_reset_x_int <= hsync_i when dbg_i(3) = '1' else not(hsync_i);
 switch_reset_y_int <= vsync_i when dbg_i(3) = '1' else not(vsync_i);
 reset_x_int <= switch_reset_x_int or fsync_i;
 reset_y_int <= switch_reset_y_int or fsync_i;
-is_top_half <= '1' when cursor_y_int < monitor_height(CURSOR_WIDTH - 1 downto 0) else '0';  --check if below half of height
+is_top_half <= '1' when cursor_y_int < monitor_height(CURSOR_WIDTH - 1 downto 1) else '0';  --check if below half of height
 lr_fft_o <= is_top_half;
 
 --Counters
@@ -142,7 +145,17 @@ x_counter : counter
         count_o => cursor_x_int
     );
 dbg_cursor_x_o <= cursor_x_int;
-next_row_int <= '1' when cursor_x_int = 1 else '0';
+
+
+next_row : process (pixel_clk_i) begin
+    if rising_edge(pixel_clk_i) then
+        prev_reset_x_int <= reset_x_int;
+        next_row_int <= '0';
+        if (prev_reset_x_int = '0' and reset_x_int ='1') then   --rising edge detection
+            next_row_int <= '1';
+        end if;
+    end if;
+end process next_row;
 
 y_counter : counter
     Generic map(
@@ -159,14 +172,21 @@ dbg_cursor_y_o <= cursor_y_int;
 --Get an idea of resolution
 get_resolution : process(pixel_clk_i) begin
     if rising_edge(pixel_clk_i) then
-        if (reset_x_int = '1') then
-            monitor_width <= cursor_x_int;
+        if (switch_reset_x_int = '1') then
+            if (cursor_x_int > 0) then  --if we reset, and it is non-zero (aka not a holding reset, but x has counted a bit)
+                monitor_width <= cursor_x_int;  --then that must be our new width
+            end if;
         end if;
-        if (reset_y_int = '1') then
-            monitor_height <= cursor_y_int;
+        if (switch_reset_y_int = '1') then
+            if (cursor_y_int > 0) then
+                monitor_height <= cursor_y_int;
+            end if;
         end if;
     end if;
 end process get_resolution; 
+dbg_height_o <= monitor_height;
+dbg_width_o <= monitor_width;
+
      
 --Delay signals for FFT data back
 tv_bus <= is_top_half & is_valid_x;
@@ -230,6 +250,7 @@ get_bin : x_cursor_to_bin
        is_valid_x_o => is_valid_x,
        dbg_bin_o => dbg_bin_o
    );
+dbg_valid_x <= is_valid_x;
 
 
 --Get the RGB value
@@ -241,13 +262,12 @@ color_get : cursor_amp_to_rgb
         monitor_width => monitor_width,
         is_top_i => sync_tv_bus(1),
         valid_x_i => sync_tv_bus(0),
-        amp_i => amp_i,
+        amp_i => amp_i, --debugging for now
         dbg_i => dbg_i(0),  --if switch 0 is thrown, every pixel is drawn to
         rgb_out => rgb_int,
         
         clk_i => pixel_clk_i
     );
-dbg_rgb_o <= rgb_int;
 
 display_sel : process (pixel_clk_i) begin
     if rising_edge(pixel_clk_i) then

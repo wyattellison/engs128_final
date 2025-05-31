@@ -81,20 +81,20 @@ check_black : process (y_cursor_i, is_top_i, valid_x_i, norm_signal_amp_int)
 begin
     --Decide which amp we are using
     if (valid_x_i = '0') then
-        effective_amp := to_unsigned(5, AMP_NORM_WIDTH);  --hard code, just how many pixels tall a dead x is
+        effective_amp := to_unsigned(2, AMP_NORM_WIDTH);  --hard code, just how many pixels tall a dead x is
     else
         effective_amp := norm_signal_amp_int;
     end if;
     
     --Check the amps
     if (is_top_i = '1') then  --if on top half (y cursor is less than mid)
-        if (monitor_height(CURSOR_WIDTH -1 downto 1) - y_cursor_i < effective_amp) then --if the y cursor is closer to midline than amp calls for
+        if (monitor_height(CURSOR_WIDTH - 1 downto 1) - y_cursor_i < effective_amp) then --if the y cursor is closer to midline than amp calls for
             is_black <= '0';
         else
             is_black <= '1';
         end if;  
     else
-        if (y_cursor_i - monitor_height(CURSOR_WIDTH -1 downto 1) < effective_amp) then --if the y cursor is closer to midline than amp calls for
+        if (y_cursor_i - monitor_height(CURSOR_WIDTH - 1 downto 1) < effective_amp) then --if the y cursor is closer to midline than amp calls for
             is_black <= '0';
         else
             is_black <= '1';
@@ -107,7 +107,7 @@ draw_pixel <= (not(is_black) or dbg_i);
 rgb_reg : process(clk_i) begin
     if rising_edge(clk_i) then
         if (draw_pixel = '0') then    
-            rgb_out <= (others => '0'); --make it black
+            rgb_out <= x"555555"; --make it grey
         else
             rgb_out <= rgb_int;
         end if;
