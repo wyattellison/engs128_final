@@ -36,6 +36,18 @@
 #include "timer_ps/timer_ps.h"
 #include "xparameters.h"
 
+#include "xil_printf.h"
+#include "iic/iic.h"
+#include "audio/audio.h"
+
+#include "xil_exception.h"
+#include "xdebug.h"
+#include "xiic.h"
+#include "xtime_l.h"
+#include "xscugic.h"
+#include "sleep.h"
+#include "xil_cache.h"
+
 #include "xil_cache.h"
 /*
  * XPAR redefines
@@ -62,6 +74,17 @@ u8 *pFrames[DISPLAY_NUM_FRAMES]; //array of pointers to the frame buffers
 /*				Procedure Definitions							*/
 /* ------------------------------------------------------------ */
 
+
+// Device instances
+static XIic sIic;
+static XScuGic sIntc;
+
+ // Interrupt vector table
+ const ivt_t ivt[] = {
+ 	//IIC
+ 	{XPAR_FABRIC_AXI_IIC_0_IIC2INTC_IRPT_INTR, (Xil_ExceptionHandler)XIic_InterruptHandler, &sIic}
+ };
+
 int main(void)
 {
 	DemoInitialize();
@@ -75,6 +98,58 @@ int main(void)
 void DemoInitialize()
 {
 	int Status;
+
+	//Initialize the interrupt controller
+	Status = fnInitInterruptController(&sIntc);
+	if(Status != XST_SUCCESS) {
+		xil_printf("Error initializing interrupts");
+		return XST_FAILURE;
+	}
+
+	// Initialize IIC controller
+	Status = fnInitIic(&sIic);
+	if(Status != XST_SUCCESS) {
+		xil_printf("Error initializing I2C controller");
+		return XST_FAILURE;
+	}
+
+
+	// Initialize Audio Codec I2S
+	Status = fnInitAudio();
+	if(Status != XST_SUCCESS) {
+		xil_printf("Audio initializing ERROR");
+		return XST_FAILURE;
+	}
+
+	{
+		XTime  tStart, tEnd;
+
+		XTime_GetTime(&tStart);
+		do {
+			XTime_GetTime(&tEnd);
+		}
+		while((tEnd-tStart)/(COUNTS_PER_SECOND/10) < 20);
+	}
+	//Initialize Audio I2S
+	Status = fnInitAudio();
+	if(Status != XST_SUCCESS) {
+		xil_printf("Audio initializing ERROR");
+		return XST_FAILURE;
+	}
+
+	fnSetLineInput();
+	//fnSetHpOutput();	// NOTE: do not set HP output
+
+	// Enable all interrupts in our interrupt vector table
+	// Make sure all driver instances using interrupts are initialized first
+	fnEnableInterrupts(&sIntc, &ivt[0], sizeof(ivt)/sizeof(ivt[0]));
+
+
+    print("Audio codec initialized.\n\r");
+    print("Successfully ran configuration sequence.");
+
+
+
 	int i;
 	/*
 	 * Initialize an array of pointers to the 3 frame buffers
@@ -102,15 +177,6 @@ void DemoInitialize()
 	if (Status != XST_SUCCESS)
 	{
 		xil_printf("Couldn't start display during demo initialization%d\r\n", Status);
-		return;
-	}
-
-	/*
-	 * Initialize the Interrupt controller and start it.
-	 */
-	Status = fnInitInterruptController(&intc);
-	if(Status != XST_SUCCESS) {
-		xil_printf("Error initializing interrupts");
 		return;
 	}
 
