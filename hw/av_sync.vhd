@@ -19,23 +19,16 @@ entity av_sync is
         hsync_i : in STD_LOGIC;
         vsync_i : in STD_LOGIC;
         fsync_i : in STD_LOGIC;
-        amp_i : in unsigned (AMP_WIDTH - 1 downto 0);
+        left_amp_i : in unsigned (AMP_WIDTH - 1 downto 0);
+        right_amp_i : in unsigned (AMP_WIDTH - 1 downto 0);
         pixel_clk_i : in STD_LOGIC;
         dbg_i : in std_logic_vector(3 downto 0);
-        lr_fft_o : out STD_LOGIC;
         fft_bin_o : out unsigned (AMP_WIDTH - 1 downto 0);
         active_video_o : out STD_LOGIC;
         hsync_o : out STD_LOGIC;
         vsync_o : out STD_LOGIC;
         fsync_o : out STD_LOGIC;
-        rgb_o : out STD_LOGIC_VECTOR (23 downto 0);
-        
-        dbg_cursor_x_o : out unsigned (CURSOR_WIDTH - 1 downto 0);
-        dbg_cursor_y_o : out unsigned (CURSOR_WIDTH - 1 downto 0);
-        dbg_height_o : out unsigned (CURSOR_WIDTH - 1 downto 0);
-        dbg_width_o : out unsigned (CURSOR_WIDTH - 1 downto 0);
-        dbg_bin_o : out unsigned(AMP_WIDTH - 1 downto 0);
-        dbg_valid_x : out std_logic
+        rgb_o : out STD_LOGIC_VECTOR (23 downto 0)
     );
 end av_sync;
 
@@ -89,7 +82,7 @@ end component;
 component x_cursor_to_bin is
     Generic (
         CURSOR_WIDTH : integer := CURSOR_WIDTH;
-        NUM_BIN_BITS : integer := AMP_WIDTH
+        NUM_BIN_BITS : integer := 7
     );
     Port ( 
        cursor_x_i : in unsigned (CURSOR_WIDTH - 1 downto 0);
@@ -103,6 +96,7 @@ constant FFT_SYNC_BUS_WIDTH : integer := 2;
 
 signal monitor_width, monitor_height : unsigned(CURSOR_WIDTH - 1 downto 0) := (others => '0');  --dynamic height tracking
 
+signal amp_int : unsigned (AMP_WIDTH - 1 downto 0) := (others => '0');
 
 signal cursor_x_int, sync_cursor_x_int : unsigned (CURSOR_WIDTH - 1 downto 0) := (others => '0'); 
 signal cursor_y_int, sync_cursor_y_int : unsigned (CURSOR_WIDTH - 1 downto 0) := (others => '0');
@@ -123,6 +117,8 @@ signal prev_reset_x_int : std_logic := '0';
 
 signal rgb_int : std_logic_vector(23 downto 0) := (others => '0');
 
+signal fft_bin_int : unsigned(6 downto 0) := (others => '0');
+
 begin
 
 
@@ -131,7 +127,7 @@ switch_reset_y_int <= vsync_i when dbg_i(3) = '1' else not(vsync_i);
 reset_x_int <= switch_reset_x_int or fsync_i;
 reset_y_int <= switch_reset_y_int or fsync_i;
 is_top_half <= '1' when cursor_y_int < monitor_height(CURSOR_WIDTH - 1 downto 1) else '0';  --check if below half of height
-lr_fft_o <= is_top_half;
+amp_int <= left_amp_i when sync_tv_bus(1) = '1' else right_amp_i;
 
 --Counters
 x_counter : counter
@@ -144,8 +140,6 @@ x_counter : counter
         clk_i => pixel_clk_i,
         count_o => cursor_x_int
     );
-dbg_cursor_x_o <= cursor_x_int;
-
 
 next_row : process (pixel_clk_i) begin
     if rising_edge(pixel_clk_i) then
@@ -167,7 +161,6 @@ y_counter : counter
         clk_i => pixel_clk_i,
         count_o => cursor_y_int
     );
-dbg_cursor_y_o <= cursor_y_int;
      
 --Get an idea of resolution
 get_resolution : process(pixel_clk_i) begin
@@ -184,9 +177,6 @@ get_resolution : process(pixel_clk_i) begin
         end if;
     end if;
 end process get_resolution; 
-dbg_height_o <= monitor_height;
-dbg_width_o <= monitor_width;
-
      
 --Delay signals for FFT data back
 tv_bus <= is_top_half & is_valid_x;
@@ -246,12 +236,11 @@ fsync_o <= sync_video_ahvf_bus(0);
 get_bin : x_cursor_to_bin
     Port map( 
        cursor_x_i => cursor_x_int,
-       fft_bin_o => fft_bin_o,
+       fft_bin_o => fft_bin_int,
        is_valid_x_o => is_valid_x,
-       dbg_bin_o => dbg_bin_o
+       dbg_bin_o => open
    );
-dbg_valid_x <= is_valid_x;
-
+fft_bin_o <= '0' & fft_bin_int;
 
 --Get the RGB value
 color_get : cursor_amp_to_rgb
@@ -262,7 +251,7 @@ color_get : cursor_amp_to_rgb
         monitor_width => monitor_width,
         is_top_i => sync_tv_bus(1),
         valid_x_i => sync_tv_bus(0),
-        amp_i => amp_i, --debugging for now
+        amp_i => amp_int, 
         dbg_i => dbg_i(0),  --if switch 0 is thrown, every pixel is drawn to
         rgb_out => rgb_int,
         

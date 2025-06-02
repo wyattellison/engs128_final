@@ -136,7 +136,7 @@ component fft_output_to_magnitude is
   );
  end component fft_output_to_magnitude;
 
-
+signal right_s00_axis_tready_int, left_s00_axis_tready_int : std_logic := '0';
 
 begin
 
@@ -152,10 +152,10 @@ left_fft : xfft_1
     aclk => s00_axis_aclk,
     s_axis_config_tdata => s_axis_config_tdata,
     s_axis_config_tvalid => s_axis_config_tvalid,
-    s_axis_config_tready => s_axis_config_tready,
+    s_axis_config_tready => open,
     s_axis_data_tdata => unfiltered_data_int,
     s_axis_data_tvalid => input_left_valid,
-    s_axis_data_tready => s00_axis_tready,
+    s_axis_data_tready => left_s00_axis_tready_int,
     s_axis_data_tlast => tlast,
     
     m_axis_data_tdata => left_fft_data_int,
@@ -176,10 +176,10 @@ right_fft : xfft_1
     aclk => s00_axis_aclk,
     s_axis_config_tdata => s_axis_config_tdata,
     s_axis_config_tvalid => s_axis_config_tvalid,
-    s_axis_config_tready => s_axis_config_tready,
+    s_axis_config_tready => open,
     s_axis_data_tdata => unfiltered_data_int,
     s_axis_data_tvalid => input_right_valid,
-    s_axis_data_tready => s00_axis_tready,
+    s_axis_data_tready => right_s00_axis_tready_int,
     s_axis_data_tlast => tlast,
     
     m_axis_data_tdata => right_fft_data_int,
@@ -194,6 +194,8 @@ right_fft : xfft_1
     event_data_in_channel_halt => open,
     event_data_out_channel_halt => open
   );
+  
+s00_axis_tready <= right_s00_axis_tready_int when left_en = '0' else left_s00_axis_tready_int;
   
 left_fft_block_ram : fft_block_ram
   PORT MAP (
