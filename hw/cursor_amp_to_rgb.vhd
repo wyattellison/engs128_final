@@ -83,7 +83,7 @@ begin
     if (valid_x_i = '0') then
         effective_amp := to_unsigned(2, AMP_NORM_WIDTH);  --hard code, just how many pixels tall a dead x is
     else
-        effective_amp := norm_signal_amp_int;
+        effective_amp := norm_signal_amp_int + 2;
     end if;
     
     --Check the amps

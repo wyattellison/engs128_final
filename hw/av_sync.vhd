@@ -19,10 +19,11 @@ entity av_sync is
         hsync_i : in STD_LOGIC;
         vsync_i : in STD_LOGIC;
         fsync_i : in STD_LOGIC;
-        left_amp_i : in unsigned (AMP_WIDTH - 1 downto 0);
-        right_amp_i : in unsigned (AMP_WIDTH - 1 downto 0);
+        left_amp_i : in unsigned (31 downto 0);
+        right_amp_i : in unsigned (31 downto 0);
         pixel_clk_i : in STD_LOGIC;
         dbg_i : in std_logic_vector(3 downto 0);
+        vol_scale_i : in std_logic_vector(2 downto 0);
         fft_bin_o : out unsigned (AMP_WIDTH - 1 downto 0);
         active_video_o : out STD_LOGIC;
         hsync_o : out STD_LOGIC;
@@ -87,15 +88,21 @@ component x_cursor_to_bin is
     Port ( 
        cursor_x_i : in unsigned (CURSOR_WIDTH - 1 downto 0);
        fft_bin_o : out unsigned (NUM_BIN_BITS - 1 downto 0);
-       is_valid_x_o : out STD_LOGIC;
-       dbg_bin_o : out unsigned (NUM_BIN_BITS - 1 downto 0)
-   );
+       is_valid_x_o : out STD_LOGIC
+    );
+end component;
+
+component slicer_selector is
+    Port ( signal_i : in unsigned (31 downto 0);
+           sel_i : in STD_LOGIC_VECTOR (2 downto 0);
+           signal_o : out unsigned (7 downto 0));
 end component;
 
 constant FFT_SYNC_BUS_WIDTH : integer := 2;
 
 signal monitor_width, monitor_height : unsigned(CURSOR_WIDTH - 1 downto 0) := (others => '0');  --dynamic height tracking
 
+signal amp_full_int : unsigned (31 downto 0) := (others => '0');
 signal amp_int : unsigned (AMP_WIDTH - 1 downto 0) := (others => '0');
 
 signal cursor_x_int, sync_cursor_x_int : unsigned (CURSOR_WIDTH - 1 downto 0) := (others => '0'); 
@@ -127,7 +134,17 @@ switch_reset_y_int <= vsync_i when dbg_i(3) = '1' else not(vsync_i);
 reset_x_int <= switch_reset_x_int or fsync_i;
 reset_y_int <= switch_reset_y_int or fsync_i;
 is_top_half <= '1' when cursor_y_int < monitor_height(CURSOR_WIDTH - 1 downto 1) else '0';  --check if below half of height
-amp_int <= left_amp_i when sync_tv_bus(1) = '1' else right_amp_i;
+amp_full_int <= left_amp_i when sync_tv_bus(1) = '1' else right_amp_i;
+
+--Grab Internal amo
+amp_scale : slicer_selector
+    Port map( 
+       signal_i => amp_full_int,
+       sel_i => vol_scale_i,
+       signal_o => amp_int
+   );
+
+
 
 --Counters
 x_counter : counter
@@ -237,8 +254,7 @@ get_bin : x_cursor_to_bin
     Port map( 
        cursor_x_i => cursor_x_int,
        fft_bin_o => fft_bin_int,
-       is_valid_x_o => is_valid_x,
-       dbg_bin_o => open
+       is_valid_x_o => is_valid_x
    );
 fft_bin_o <= '0' & fft_bin_int;
 
