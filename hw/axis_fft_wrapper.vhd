@@ -52,17 +52,6 @@ entity axis_fft_wrapper is
 		s00_axis_tstrb    : in std_logic_vector((C_AXI_STREAM_DATA_WIDTH/8)-1 downto 0);
 		s00_axis_tlast    : in std_logic;
 		s00_axis_tvalid   : in std_logic;
-		
-        -- AXI Stream Interface (Tranmitter/Controller)
-		-- Ports of Axi Controller Bus Interface M00_AXIS
---		m00_axis_aclk     : in std_logic;
---		m00_axis_aresetn  : in std_logic;
---		m00_axis_tvalid   : out std_logic;
---		m00_axis_tdata    : out std_logic_vector(C_AXI_STREAM_DATA_WIDTH-1 downto 0);
---		m00_axis_tstrb    : out std_logic_vector((C_AXI_STREAM_DATA_WIDTH/8)-1 downto 0);
---		m00_axis_tlast    : out std_logic;
---		m00_axis_tready   : in std_logic;
---		m00_axis_tuser    : out std_logic_vector(7 downto 0)
 
         left_fft_bram_rd_addr : in std_logic_vector(7 downto 0);
         left_fft_bram_rd_data : out std_logic_vector(31 downto 0);
