@@ -1,0 +1,36 @@
+{
+   "ActiveEmotionalView":"Default View",
+   "Default View_ScaleFactor":"1.5",
+   "Default View_TopLeft":"-286,-101",
+   "ExpandedHierarchyInLayout":"",
+   "guistr":"# # String gsaved with Nlview 7.0r6  2020-01-29 bk=1.5227 VDI=41 GEI=36 GUI=JA:10.0 non-TLS
+#  -string -flagsOSRD
+preplace portBus left_fft_bram_rd_data -pg 1 -lvl 4 -x 1090 -y 280 -defaultsOSRD
+preplace portBus right_fft_bram_rd_data -pg 1 -lvl 4 -x 1090 -y 310 -defaultsOSRD
+preplace inst sim_clk_gen_0 -pg 1 -lvl 1 -x 100 -y 490 -defaultsOSRD
+preplace inst sim_clk_gen_1 -pg 1 -lvl 1 -x 100 -y 70 -defaultsOSRD
+preplace inst xlconstant_0 -pg 1 -lvl 1 -x 100 -y 380 -defaultsOSRD
+preplace inst xlconstant_1 -pg 1 -lvl 1 -x 100 -y 180 -defaultsOSRD
+preplace inst xlconstant_2 -pg 1 -lvl 1 -x 100 -y 280 -defaultsOSRD
+preplace inst axis_dds_wrapper_1 -pg 1 -lvl 2 -x 420 -y 290 -defaultsOSRD
+preplace inst c_counter_binary_0 -pg 1 -lvl 2 -x 420 -y 560 -defaultsOSRD
+preplace inst xlconstant_3 -pg 1 -lvl 1 -x 100 -y 600 -defaultsOSRD
+preplace inst axis_fft_wrapper_0 -pg 1 -lvl 3 -x 840 -y 300 -defaultsOSRD
+preplace netloc axis_fft_wrapper_0_left_fft_bram_rd_data 1 3 1 1050J 280n
+preplace netloc axis_fft_wrapper_0_right_fft_bram_rd_data 1 3 1 NJ 310
+preplace netloc c_counter_binary_0_Q 1 2 1 600 320n
+preplace netloc sim_clk_gen_0_clk 1 1 2 220 170 600
+preplace netloc sim_clk_gen_0_sync_rst 1 1 2 210 180 590J
+preplace netloc sim_clk_gen_1_clk 1 1 1 240J 60n
+preplace netloc xlconstant_0_dout 1 1 1 230J 340n
+preplace netloc xlconstant_1_dout 1 1 1 200J 180n
+preplace netloc xlconstant_2_dout 1 1 1 NJ 280
+preplace netloc xlconstant_3_dout 1 1 1 240 300n
+preplace netloc axis_dds_wrapper_1_m00_axis 1 2 1 N 260
+levelinfo -pg 1 -10 100 420 840 1090
+pagesize -pg 1 -db -bbox -sgen -10 0 1320 660
+"
+}
+{
+   "da_clkrst_cnt":"5"
+}
